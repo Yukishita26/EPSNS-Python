@@ -146,20 +146,20 @@ class EngineerSNS(object):
                   "text": text
               })
     
-    def block_user(self, username):
+    def block_user(self, userid):
         """
         add a user to block list
 
         Parameters
         ----------
-        username: str
+        userid: str
             user ID to block
 
         Returns
         -------
         None
         """
-        self.blockedusers.add(username)
+        self.blockedusers.add(userid)
         
 if __name__=="__main__":
     print("test")
