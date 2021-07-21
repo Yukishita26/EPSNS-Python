@@ -35,3 +35,11 @@ sns.post_new_text(text="""Hello, SNS!
 post from Python console""")
 # post a text
 ```
+
+block a uesr
+```python
+sns.show_again_latest_posts(show_id=True)
+# >>> displayed posts with id
+sns.block_user(userid="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+# add a uesr to block list (initialized on every boot)
+```
