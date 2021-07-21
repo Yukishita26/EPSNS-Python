@@ -96,7 +96,6 @@ class EngineerSNS(object):
             response status code
         """
         posts_r = requests.get(url + "/text/all?$orderby=_created_at desc&$limit={}".format(limit))
-        print(posts_r)
         for post in posts_r.json():
             if post["_user_id"] not in self.blockedusers:
                 if show_id:
@@ -160,6 +159,20 @@ class EngineerSNS(object):
         None
         """
         self.blockedusers.add(userid)
+    def unblock_user(self, userid):
+        """
+        remove a user from block list
+
+        Parameters
+        ----------
+        userid: str
+            user ID to block
+
+        Returns
+        -------
+        None
+        """
+        self.blockedusers.remove(userid)
         
 if __name__=="__main__":
     print("test")
