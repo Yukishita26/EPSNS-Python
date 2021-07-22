@@ -71,15 +71,51 @@ class EngineerSNS(object):
             response status code
         """
         users_r = requests.get(url + "/user/all")
-        for user in users_r.json():
-            print(user["name"], user["description"])
+        if not only_get:
+            for user in users_r.json():
+                print(user["name"], user["description"])
         self.userdict = {user["id"]:user["name"] for user in users_r.json()}
         self.users = users_r.json()
         return users_r
 
+    def show_posts(self, json, show_id=False):
+        """
+        display post dates, names, and texts
+
+        Parameters
+        ----------
+        json: list[dict]
+            list of posts as json format
+        show_id: bool, default False
+            True if showing user ID instead of screen name 
+
+        Returns
+        -------
+        None
+        """
+        for post in json:
+            if post['_user_id'] not in self.blockedusers:
+                time = toJST(post['_created_at'])
+                name = post['_user_id'] if show_id else self.userdict.get(post['_user_id'], 'unknown')
+                text = post['text']
+                if 'in_reply_to_user_id' in post:
+                    text = f"@{self.userdict.get(post['in_reply_to_user_id'], 'unknown')} {text}"
+                if 'in_reply_to_text_id' in post:
+                    rpost = [posti for posti in json if posti['id']==post['in_reply_to_text_id']]
+                    if rpost != []:
+                        rtime = toJST(rpost[0]['_created_at'])
+                        rname = rpost[0]['_user_id'] if show_id else self.userdict.get(rpost[0]['_user_id'], 'unknown')
+                        rtext = rpost[0]['text']
+                        rtext.replace('\n', '\n> ')
+                        text = f"> {rtime} {rname}\n> {rtext}\n{text}"
+                    else:
+                        text = f"> unknown\n{text}"
+                text = text.replace('\n','\n\t')
+                print(f"{time} {name}\n\t{text}")
+
     def get_latest_posts(self, limit=20, only_get=False, show_id=False):
         """
-        get the last some posts and print post dates, names, and texts
+        get the last some posts and display posts
 
         Parameters
         ----------
@@ -96,12 +132,8 @@ class EngineerSNS(object):
             response status code
         """
         posts_r = requests.get(url + "/text/all?$orderby=_created_at desc&$limit={}".format(limit))
-        for post in posts_r.json():
-            if post["_user_id"] not in self.blockedusers:
-                if show_id:
-                    print(toJST(post["_created_at"]), post["_user_id"], post["text"])
-                else:
-                    print(toJST(post["_created_at"]), self.userdict.get(post["_user_id"], "unknown"), post["text"])
+        if not only_get:
+            self.show_posts(posts_r.json(), show_id)
         self.posts = posts_r.json()
         return posts_r
     
